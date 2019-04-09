@@ -14,8 +14,6 @@ with tf.variable_scope('net_encode'):
 
     encoder_Y_ix = tf.placeholder(shape=[None, None],dtype=tf.int32)
     encoder_Y_onehot = tf.one_hot(encoder_Y_ix, src_vocab_size)
-    # encoder_Y_ix_reverse = tf.placeholder(shape=[None, None], dtype=tf.int32)
-    # encoder_Y_onehot_reverse = tf.one_hot(encoder_Y_ix_reverse, src_vocab_size)
 
     enc_cell_fw = tf.nn.rnn_cell.MultiRNNCell(
         [tf.nn.rnn_cell.LSTMCell(state_size, name='layer' + str(i)) for i in range(num_layers)])
@@ -26,11 +24,7 @@ with tf.variable_scope('net_encode'):
     enc_outputs, enc_final_states = tf.nn.bidirectional_dynamic_rnn(enc_cell_fw,enc_cell_bw,encoder_X,encoder_X_len,enc_fw_initstate,enc_bw_initstate)
     enc_fw_bw_outputs = tf.concat(enc_outputs, 2)
     enc_pred = tf.layers.dense(enc_fw_bw_outputs, units=src_vocab_size)
-    # enc_fw_pred = tf.layers.dense(enc_outputs[0],units=src_vocab_size)
-    # enc_bw_pred = tf.layers.dense(enc_outputs[1], units=src_vocab_size)
     encoder_loss = tf.losses.softmax_cross_entropy(encoder_Y_onehot,enc_pred)
-    #encoder_bw_loss = tf.losses.softmax_cross_entropy(encoder_Y_onehot_reverse,enc_bw_pred)
-    #encoder_loss = encoder_fw_loss+encoder_bw_loss
     fw_bw_final_cellstate = tf.concat([enc_final_states[0][-1].c,enc_final_states[1][-1].c],axis=-1)
     fw_bw_final_hidddenstate = tf.concat([enc_final_states[0][-1].h, enc_final_states[1][-1].h], axis=-1)
     encoder_trainop = tf.train.AdamOptimizer(0.001).minimize(encoder_loss)
