@@ -57,7 +57,7 @@ if __name__ == '__main__':
     starttime = time.time()
     for i in range(epochs):
         for j, ((ec_X_lens, ec_X_ix, ec_Y_ix), (dc_X_lens, dc_X_ix, dc_Y_ix)) in enumerate(getbatch()):
-            _, encode_err, _log, pred = sess.run([decoder_trainop, total_loss, log_all, pred_ix],
+            _, _, encode_err, _log, pred = sess.run([encoder_trainop,decoder_trainop, total_loss, log_all, pred_ix],
                                                  feed_dict={encoder_X_len: ec_X_lens, encoder_X_ix: ec_X_ix,
                                                             encoder_Y_ix: ec_Y_ix,
                                                             decoder_X_len: dc_X_lens, decoder_X_ix: dc_X_ix,

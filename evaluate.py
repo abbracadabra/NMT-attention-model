@@ -11,7 +11,7 @@ def evaluate(ix):
     step = 0
     initdecix = tgt_w2i['<sos>']
     predsentence = ''
-    while pw!='<eos>':
+    while pw!='<eos>' and step<100:
         pix,state = sess.run([pred_ix,dec_final_state],
                        feed_dict={dec_initstate:initstate,
                                   enc_fw_bw_outputs: encout,

@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from config import *
 
+
 with tf.variable_scope('net_encode'):
     ph_src_embedding = tf.placeholder(dtype=tf.float32,shape=[src_vocab_size,src_w2v_dim],name='src_vocab_embedding_placeholder')
     #src_word_emb = tf.Variable(initial_value=ph_src_embedding,dtype=tf.float32,trainable=False, name='src_vocab_embedding_variable')
@@ -50,15 +51,15 @@ with tf.variable_scope('net_decode'):
     enc_dec_cat = tf.concat([tile_enc,tile_dec],-1) # [batchsize,decoder_len,encoder_len,state_size*2*2]
     weights = tf.nn.softmax(tf.layers.dense(enc_dec_cat,units=1),axis=-2) # [batchsize,decoder_len,encoder_len,1]
     weighted_enc = tf.tile(weights, [1, 1, 1, state_size * 2])*tf.tile(tf.expand_dims(enc_fw_bw_outputs,1),[1,decoder_timestep,1,1]) # [batchsize,decoder_len,encoder_len,state_size*2]
-    attentions = tf.reduce_sum(weighted_enc,axis=2,keepdims=False) # [batchsize,decoder_len,state_size*2]
-    dec_attention_cat = tf.concat([dec_outputs,attentions],axis=-1) # [batchsize,decoder_len,state_size*2*2]
+    attention = tf.reduce_sum(weighted_enc,axis=2,keepdims=False) # [batchsize,decoder_len,state_size*2]
+    dec_attention_cat = tf.concat([dec_outputs,attention],axis=-1) # [batchsize,decoder_len,state_size*2*2]
     dec_pred = tf.layers.dense(dec_attention_cat,units=tgt_vocab_size) # [batchsize,decoder_len,tgt_vocab_size]
     pred_ix = tf.argmax(dec_pred,axis=-1) # [batchsize,decoder_len]
     decoder_loss = tf.losses.softmax_cross_entropy(decoder_Y_onehot,dec_pred)
     total_loss = encoder_loss + decoder_loss
     decoder_trainop = tf.train.AdamOptimizer(0.001).minimize(total_loss)
 
-_l0 = tf.summary.scalar('decoder_loss',decoder_loss)
-_l1 = tf.summary.scalar('encoder_loss',encoder_loss)
+tf.summary.scalar('decoder_loss',decoder_loss)
+tf.summary.scalar('encoder_loss',encoder_loss)
 log_all = tf.summary.merge_all()
 writer = tf.summary.FileWriter(log_path,graph=tf.get_default_graph())
