@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     saver = tf.train.Saver()
     sess = tf.Session()
-    # sess.run(tf.global_variables_initializer())
+    #sess.run(tf.global_variables_initializer())
     saver.restore(sess, model_path)
     starttime = time.time()
     for i in range(epochs):
