@@ -5,7 +5,7 @@ from util import *
 import copy
 
 def evaluate(ix):
-    initstate,encout = sess.run([dec_initstate,enc_fw_bw_outputs],
+    initstate,encout = sess.run([enc_final_states,enc_outputs],
                                 feed_dict={encoder_X_ix:[ix],encoder_X_len:[len(ix)],ph_src_embedding:src_w2v})
     pw = ''
     step = 0
@@ -13,8 +13,8 @@ def evaluate(ix):
     predsentence = ''
     while pw!='<eos>' and step<100:
         pix,state = sess.run([pred_ix,dec_final_state],
-                       feed_dict={dec_initstate:initstate,
-                                  enc_fw_bw_outputs: encout,
+                       feed_dict={enc_final_states:initstate,
+                                  enc_outputs: encout,
                                   decoder_X_ix: [[initdecix]], decoder_X_len: [1],
                                   ph_tgt_embedding: tgt_w2v,
                                   encoder_timestep:len(encout[0])})

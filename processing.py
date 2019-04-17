@@ -14,7 +14,7 @@ src_traindata_raw='~/wind/Users/yl_gong/PycharmProjects/rnnnnnn/data/news-commen
 tgt_traindata_raw='~/wind/Users/yl_gong/PycharmProjects/rnnnnnn/data/news-commentary-v13.zh-en.zh'
 
 def segmentation(txt_fp):
-    run("cat "+txt_fp+' | '+REM_NON_PRINT_CHAR+'|'+NORM_PUNC+'|'+DESCAPE+'|'+MOSES_TOKENIZER+'|'+CJK_CHAR_SPLIT+'>'+txt_fp+'.tok',shell=True)
+    run("cat "+txt_fp+' | '+MOSES_LC+'|'+REM_NON_PRINT_CHAR+'|'+NORM_PUNC+'|'+DESCAPE+'|'+MOSES_TOKENIZER+'|'+CJK_CHAR_SPLIT+'>'+txt_fp+'.tok',shell=True)
 
 def subwordsegmentation(txt_fp):
     # apply bpe

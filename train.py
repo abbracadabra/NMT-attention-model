@@ -57,7 +57,7 @@ if __name__ == '__main__':
     starttime = time.time()
     for i in range(epochs):
         for j, ((ec_X_lens, ec_X_ix, ec_Y_ix), (dc_X_lens, dc_X_ix, dc_Y_ix)) in enumerate(getbatch()):
-            _, _, encode_err, _log, pred = sess.run([encoder_trainop,decoder_trainop, total_loss, log_all, pred_ix],
+            _, total_err, _log, pred = sess.run([trainop, total_loss, log_all, pred_ix],
                                                  feed_dict={encoder_X_len: ec_X_lens, encoder_X_ix: ec_X_ix,
                                                             encoder_Y_ix: ec_Y_ix,
                                                             decoder_X_len: dc_X_lens, decoder_X_ix: dc_X_ix,
@@ -65,7 +65,7 @@ if __name__ == '__main__':
                                                             # encoder_Y_ix_reverse:ec_Y_ix_reverse,
                                                             ph_src_embedding: src_w2v, ph_tgt_embedding: tgt_w2v})
             writer.add_summary(_log)
-            print(encode_err)
+            print(total_err)
             if j % 10 == 0:
                 saver.save(sess, model_path)
                 for l in pred:
@@ -74,8 +74,8 @@ if __name__ == '__main__':
                         ss.append(tgt_i2w[ll])
                     print(ss)
 
-            if (time.time() - starttime) / 60 > 240:
-                raise Exception('120min')
+            # if (time.time() - starttime) / 60 > 240:
+            #     raise Exception('120min')
 
 
 

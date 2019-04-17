@@ -20,7 +20,7 @@ with tf.variable_scope('net_encode'):
     enc_outputs, enc_final_states = tf.nn.dynamic_rnn(enc_cell,encoder_X,encoder_X_len,enc_initstate)
     enc_pred = tf.layers.dense(enc_outputs, units=src_vocab_size)
     encoder_loss = tf.losses.softmax_cross_entropy(encoder_Y_onehot,enc_pred)
-    encoder_trainop = tf.train.AdamOptimizer(0.001).minimize(encoder_loss)
+    #encoder_trainop = tf.train.AdamOptimizer(0.001).minimize(encoder_loss)
 
 with tf.variable_scope('net_decode'):
     ph_tgt_embedding = tf.placeholder(dtype=tf.float32, shape=[tgt_vocab_size, tgt_w2v_dim],
@@ -41,14 +41,14 @@ with tf.variable_scope('net_decode'):
     tile_dec = tf.tile(tf.expand_dims(dec_outputs, 2), [1, 1, encoder_timestep, 1]) # [batchsize,decoder_len,encoder_len,state_size]
     enc_dec_cat = tf.concat([tile_enc,tile_dec],-1) # [batchsize,decoder_len,encoder_len,state_size*2]
     weights = tf.nn.softmax(tf.layers.dense(enc_dec_cat,units=1),axis=-2) # [batchsize,decoder_len,encoder_len,1]
-    weighted_enc = tf.tile(weights, [1, 1, 1, state_size])*tf.tile(tf.expand_dims(enc_outputs,1),[1,decoder_timestep,1,1]) # [batchsize,decoder_len,encoder_len,state_size]
+    weighted_enc = tf.tile(weights, [1, 1, 1, state_size])*tile_enc # [batchsize,decoder_len,encoder_len,state_size]
     attention = tf.reduce_sum(weighted_enc,axis=2,keepdims=False) # [batchsize,decoder_len,state_size]
     dec_attention_cat = tf.concat([dec_outputs,attention],axis=-1) # [batchsize,decoder_len,state_size*2]
     dec_pred = tf.layers.dense(dec_attention_cat,units=tgt_vocab_size) # [batchsize,decoder_len,tgt_vocab_size]
     pred_ix = tf.argmax(dec_pred,axis=-1) # [batchsize,decoder_len]
     decoder_loss = tf.losses.softmax_cross_entropy(decoder_Y_onehot,dec_pred)
     total_loss = encoder_loss + decoder_loss
-    decoder_trainop = tf.train.AdamOptimizer(0.001).minimize(total_loss)
+    trainop = tf.train.AdamOptimizer(0.001).minimize(total_loss)
 
 tf.summary.scalar('decoder_loss',decoder_loss)
 tf.summary.scalar('encoder_loss',encoder_loss)
