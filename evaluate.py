@@ -36,8 +36,8 @@ if __name__ == '__main__':
     src_w2v, src_w2i, src_i2w = loadw2v(src_lang_embedding)
     tgt_w2v, tgt_w2i, tgt_i2w = loadw2v(tgt_lang_embedding)
 
-    saver = tf.train.Saver()
     sess = tf.Session()
+    sess.run(tf.global_variables_initializer())
     saver.restore(sess, model_path)
 
     for ix in gettest():

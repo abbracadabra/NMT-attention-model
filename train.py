@@ -50,22 +50,33 @@ if __name__ == '__main__':
     src_w2v, src_w2i, src_i2w = loadw2v(src_lang_embedding)
     tgt_w2v, tgt_w2i, tgt_i2w = loadw2v(tgt_lang_embedding)
 
-    saver = tf.train.Saver()
     sess = tf.Session()
-    #sess.run(tf.global_variables_initializer())
+    sess.run(tf.global_variables_initializer())
     saver.restore(sess, model_path)
     starttime = time.time()
     for i in range(epochs):
         for j, ((ec_X_lens, ec_X_ix, ec_Y_ix), (dc_X_lens, dc_X_ix, dc_Y_ix)) in enumerate(getbatch()):
-            _, total_err, _log, pred = sess.run([trainop, total_loss, log_all, pred_ix],
-                                                 feed_dict={encoder_X_len: ec_X_lens, encoder_X_ix: ec_X_ix,
-                                                            encoder_Y_ix: ec_Y_ix,
-                                                            decoder_X_len: dc_X_lens, decoder_X_ix: dc_X_ix,
-                                                            decoder_Y_ix: dc_Y_ix,
-                                                            # encoder_Y_ix_reverse:ec_Y_ix_reverse,
-                                                            ph_src_embedding: src_w2v, ph_tgt_embedding: tgt_w2v})
+            # _, total_err, _log, pred = sess.run([trainop, total_loss, log_all, pred_ix],
+            #                                      feed_dict={encoder_X_len: ec_X_lens, encoder_X_ix: ec_X_ix,
+            #                                                 encoder_Y_ix: ec_Y_ix,
+            #                                                 decoder_X_len: dc_X_lens, decoder_X_ix: dc_X_ix,
+            #                                                 decoder_Y_ix: dc_Y_ix,
+            #                                                 ph_src_embedding: src_w2v, ph_tgt_embedding: tgt_w2v})
+            _, enc_err, _log ,enc_o,enc_s = sess.run([encoder_trainop, encoder_loss, enc_log,enc_outputs,enc_final_states],
+                                                feed_dict={encoder_X_len: ec_X_lens, encoder_X_ix: ec_X_ix,
+                                                           encoder_Y_ix: ec_Y_ix,
+                                                           ph_src_embedding: src_w2v})
             writer.add_summary(_log)
-            print(total_err)
+            print(enc_err)
+            _, dec_err, _log, pred = sess.run(
+                [decoder_trainop, decoder_loss, dec_log, pred_ix],
+                feed_dict={decoder_X_len: dc_X_lens, decoder_X_ix: dc_X_ix,
+                           decoder_Y_ix: dc_Y_ix,
+                           enc_outputs:enc_o,enc_final_states:enc_s,
+                           ph_tgt_embedding: tgt_w2v,
+                           encoder_timestep: len(enc_o[0])})
+            writer.add_summary(_log)
+            print(dec_err)
             if j % 10 == 0:
                 saver.save(sess, model_path)
                 for l in pred:

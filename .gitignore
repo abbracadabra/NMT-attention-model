@@ -1,3 +1,6 @@
-/log
-/mdl
-/data
+/log/*
+/mdl/*
+/data/*
+!log/.donotdelete
+!mdl/.donotdelete
+!data/.donotdelete
